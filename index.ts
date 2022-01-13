@@ -1,8 +1,8 @@
-// require("dotenv").config();
 import { Exchange, Network, utils } from "@zetamarkets/sdk";
 import { PublicKey, Connection } from "@solana/web3.js";
 import { EventType } from "@zetamarkets/sdk/dist/events";
 import { collectPricingAndSurfaceData } from "./greeks-update-processing";
+import { collectMarginAccountData } from "./margin-account-processing";
 
 const callback = (eventType: EventType, data: any) => {
   switch (eventType) {
@@ -20,8 +20,8 @@ const network =
   process.env!.NETWORK === "mainnet"
     ? Network.MAINNET
     : process.env!.NETWORK === "devnet"
-    ? Network.DEVNET
-    : Network.LOCALNET;
+      ? Network.DEVNET
+      : Network.LOCALNET;
 
 const main = async () => {
   await Exchange.load(
@@ -33,6 +33,7 @@ const main = async () => {
     undefined,
     callback
   );
+  collectMarginAccountData();
 };
 
 main().catch(console.error.bind(console));
