@@ -1,4 +1,4 @@
-import { subscription, programTypes } from "@zetamarkets/sdk";
+import { subscription, programTypes, types } from "@zetamarkets/sdk";
 import { POSITION_PRECISION } from "@zetamarkets/sdk/dist/constants";
 import { convertNativeBNToDecimal } from "@zetamarkets/sdk/dist/utils";
 import { putFirehoseBatch } from "./utils/firehose";
@@ -6,7 +6,7 @@ import { MarginAccountPosition } from "./utils/types";
 
 export const collectMarginAccountData = () => {
   subscription.subscribeProgramAccounts<programTypes.MarginAccount>(
-    subscription.ProgramAccountType.MarginAccount,
+    types.ProgramAccountType.MarginAccount,
     async (
       data: subscription.AccountSubscriptionData<programTypes.MarginAccount>
     ) => {
