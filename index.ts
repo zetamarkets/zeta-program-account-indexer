@@ -11,17 +11,14 @@ const callback = (eventType: EventType, data: any) => {
   }
 };
 
-export const connection = new Connection(
-  process.env.RPC_URL,
-  utils.defaultCommitment()
-);
+export const connection = new Connection(process.env.RPC_URL, "finalized");
 
 const network =
   process.env!.NETWORK === "mainnet"
     ? Network.MAINNET
     : process.env!.NETWORK === "devnet"
-      ? Network.DEVNET
-      : Network.LOCALNET;
+    ? Network.DEVNET
+    : Network.LOCALNET;
 
 const main = async () => {
   await Exchange.load(
