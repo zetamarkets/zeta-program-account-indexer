@@ -1,5 +1,5 @@
 import { Exchange, Network, utils } from "@zetamarkets/sdk";
-import { PublicKey, Connection } from "@solana/web3.js";
+import { PublicKey, Connection, ConfirmOptions } from "@solana/web3.js";
 import { EventType } from "@zetamarkets/sdk/dist/events";
 import { collectPricingAndSurfaceData } from "./greeks-update-processing";
 import { collectMarginAccountData } from "./margin-account-processing";
@@ -11,7 +11,12 @@ const callback = (eventType: EventType, data: any) => {
   }
 };
 
-export const connection = new Connection(process.env.RPC_URL, "finalized");
+const opts: ConfirmOptions = {
+  skipPreflight: false,
+  preflightCommitment: "finalized",
+  commitment: "finalized",
+};
+export const connection = new Connection(process.env.RPC_URL, opts.commitment);
 
 const network =
   process.env!.NETWORK === "mainnet"
@@ -25,7 +30,7 @@ const main = async () => {
     new PublicKey(process.env.PROGRAM_ID),
     network,
     connection,
-    utils.defaultCommitment(),
+    opts,
     undefined,
     undefined,
     callback
