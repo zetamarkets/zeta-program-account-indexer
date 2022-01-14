@@ -1,6 +1,6 @@
 import AWS from "aws-sdk";
 import { AWSOptions } from "./aws-config";
-import { Pricing, Surface, Trade } from "./types";
+import { MarginAccountPosition, Pricing, Surface, Trade } from "./types";
 
 let firehose = new AWS.Firehose(AWSOptions);
 
@@ -11,7 +11,7 @@ firehose.listDeliveryStreams(function (err, data) {
 });
 
 export const putFirehoseBatch = (
-  data: Trade[] | Pricing[] | Surface[],
+  data: Trade[] | Pricing[] | Surface[] | MarginAccountPosition[],
   deliveryStreamName: string
 ) => {
   if (!data.length) return;

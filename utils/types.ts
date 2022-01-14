@@ -46,17 +46,13 @@ export interface Surface {
   interest_rate: number;
 }
 
-export interface MarginAccount {
+export interface MarginAccountPosition {
   timestamp: number;
   owner_pub_key: string;
-  expiry_timestamp: number[];
-  balance: number;
-  positions: Position[];
-  rebalance_amount: number;
+  expiry_timestamp: number;
   force_cancel_flag: boolean;
-}
-
-export interface Position {
+  balance: number;
+  rebalance_amount: number;
   market_index: number;
   position: number;
   cost_of_trades: number;
