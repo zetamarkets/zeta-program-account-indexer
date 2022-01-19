@@ -36,6 +36,29 @@ const main = async () => {
     callback
   );
   collectMarginAccountData();
+
+  const refreshExchange = async () => {
+    await Exchange.close().then(async () => {
+      console.log("Reloading Exchange..")
+      await Exchange.load(
+        new PublicKey(process.env.PROGRAM_ID),
+        network,
+        connection,
+        utils.defaultCommitment(),
+        undefined,
+        undefined,
+        callback
+      );
+      collectMarginAccountData();
+    }).catch((error) => {
+      console.log("Failed to close Exchange:", error);
+    })
+  }
+  setInterval(async () => {
+    console.log("Refreshing Exchange");
+    refreshExchange();
+  }, 21600000); // Refresh every 6 hours
+
 };
 
 main().catch(console.error.bind(console));
