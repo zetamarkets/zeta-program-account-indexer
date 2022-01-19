@@ -40,10 +40,11 @@ const main = async () => {
   const refreshExchange = async () => {
     await Exchange.close().then(async () => {
       console.log("Reloading Exchange..")
+      const newConnection = new Connection(process.env.RPC_URL, "finalized");
       await Exchange.load(
         new PublicKey(process.env.PROGRAM_ID),
         network,
-        connection,
+        newConnection,
         utils.defaultCommitment(),
         undefined,
         undefined,
