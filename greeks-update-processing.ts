@@ -61,6 +61,8 @@ export const collectPricingAndSurfaceData = async () => {
     surfaceUpdate.push(newSurfaceUpdate);
     putFirehoseBatch(surfaceUpdate, process.env.FIREHOSE_DS_NAME_SURFACES);
 
+    let marginAccounts = await Exchange.program.account.marginAccount.all();
+
     let markets = Exchange.markets.getMarketsByExpiryIndex(expiryIndex);
     for (var j = 0; j < markets.length; j++) {
       let market = markets[j];
@@ -83,17 +85,13 @@ export const collectPricingAndSurfaceData = async () => {
       ).toNumber();
 
       let totalPositions = 0;
-      await Exchange.program.account.marginAccount.all().then((marginAccounts) => {
-        for (var i = 0; i < marginAccounts.length; i++) {
-          let acc = marginAccounts[i].account as programTypes.MarginAccount;
-          totalPositions += utils.convertNativeBNToDecimal(
-            acc.positions[marketIndex].position.abs(),
-            3
-          );
-        }
-      }).catch(() =>{
-        console.log("Failed to get margin accounts.");
-      })
+      for (var i = 0; i < marginAccounts.length; i++) {
+        let acc = marginAccounts[i].account as programTypes.MarginAccount;
+        totalPositions += utils.convertNativeBNToDecimal(
+          acc.positions[marketIndex].position.abs(),
+          3
+        );
+      }
 
       const newPricingUpdate: Pricing = {
         timestamp: timestamp,
@@ -106,7 +104,7 @@ export const collectPricingAndSurfaceData = async () => {
         delta: delta,
         sigma: sigma,
         vega: vega,
-        open_interest: totalPositions,
+        open_interest: totalPositions / 2,
       };
       pricingUpdate.push(newPricingUpdate);
     }
