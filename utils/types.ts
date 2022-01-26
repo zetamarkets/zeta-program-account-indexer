@@ -34,6 +34,7 @@ export interface Pricing {
   delta: number;
   sigma: number;
   vega: number;
+  open_interest: number;
 }
 
 export interface Surface {

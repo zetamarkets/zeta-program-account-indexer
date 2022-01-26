@@ -1,4 +1,4 @@
-import { constants, Decimal, Exchange } from "@zetamarkets/sdk";
+import { constants, Decimal, Exchange, programTypes, utils } from "@zetamarkets/sdk";
 import { Pricing, Surface } from "./utils/types";
 import { putFirehoseBatch } from "./utils/firehose";
 import {
@@ -6,7 +6,7 @@ import {
   getGreeksIndex,
 } from "@zetamarkets/sdk/dist/utils";
 
-export const collectPricingAndSurfaceData = () => {
+export const collectPricingAndSurfaceData = async () => {
   const timestamp = Math.floor(Date.now() / 1000);
   const pricingUpdate: Pricing[] = [];
   const surfaceUpdate: Surface[] = [];
@@ -82,6 +82,19 @@ export const collectPricingAndSurfaceData = () => {
         Exchange.greeks.productGreeks[greeksIndex].vega
       ).toNumber();
 
+      let totalPositions = 0;
+      await Exchange.program.account.marginAccount.all().then((marginAccounts) => {
+        for (var i = 0; i < marginAccounts.length; i++) {
+          let acc = marginAccounts[i].account as programTypes.MarginAccount;
+          totalPositions += utils.convertNativeBNToDecimal(
+            acc.positions[marketIndex].position.abs(),
+            3
+          );
+        }
+      }).catch(() =>{
+        console.log("Failed to get margin accounts.");
+      })
+
       const newPricingUpdate: Pricing = {
         timestamp: timestamp,
         expiry_series_index: expiryIndex,
@@ -93,6 +106,7 @@ export const collectPricingAndSurfaceData = () => {
         delta: delta,
         sigma: sigma,
         vega: vega,
+        open_interest: totalPositions,
       };
       pricingUpdate.push(newPricingUpdate);
     }
