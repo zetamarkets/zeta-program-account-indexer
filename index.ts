@@ -25,6 +25,22 @@ const network =
     ? Network.DEVNET
     : Network.LOCALNET;
 
+export const refreshExchange = async () => {
+  await Exchange.close();
+  console.log("Reloading Exchange..")
+  const newConnection = new Connection(process.env.RPC_URL, "finalized");
+  await Exchange.load(
+    new PublicKey(process.env.PROGRAM_ID),
+    network,
+    newConnection,
+    opts,
+    undefined,
+    undefined,
+    callback
+  );
+  collectMarginAccountData();
+};
+
 const main = async () => {
   await Exchange.load(
     new PublicKey(process.env.PROGRAM_ID),
@@ -37,29 +53,14 @@ const main = async () => {
   );
   collectMarginAccountData();
 
-  const refreshExchange = async () => {
-    await Exchange.close().then(async () => {
-      console.log("Reloading Exchange..")
-      const newConnection = new Connection(process.env.RPC_URL, "finalized");
-      await Exchange.load(
-        new PublicKey(process.env.PROGRAM_ID),
-        network,
-        newConnection,
-        utils.defaultCommitment(),
-        undefined,
-        undefined,
-        callback
-      );
-      collectMarginAccountData();
-    }).catch((error) => {
-      console.log("Failed to close Exchange:", error);
-    })
-  }
   setInterval(async () => {
     console.log("Refreshing Exchange");
     refreshExchange();
-  }, 21600000); // Refresh every 6 hours
+  }, 10_800_000); // Refresh every 3 hours
 
+  setInterval(async () => {
+    await Exchange.updateExchangeState();
+  }, 60_000);
 };
 
 main().catch(console.error.bind(console));
