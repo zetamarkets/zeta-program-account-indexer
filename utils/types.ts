@@ -24,7 +24,7 @@ export interface Trade {
 
 export interface Pricing {
   timestamp: number;
-  slot?: number;
+  slot: number;
   expiry_series_index: number;
   expiry_timestamp: number;
   market_index: number;
@@ -39,7 +39,7 @@ export interface Pricing {
 
 export interface Surface {
   timestamp: number;
-  slot?: number;
+  slot: number;
   expiry_series_index: number;
   expiry_timestamp: number;
   vol_surface: number[];
@@ -49,6 +49,7 @@ export interface Surface {
 
 export interface MarginAccountPosition {
   timestamp: number;
+  slot: number;
   owner_pub_key: string;
   expiry_timestamp: number;
   force_cancel_flag: boolean;

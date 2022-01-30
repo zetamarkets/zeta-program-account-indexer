@@ -1,4 +1,4 @@
-import { subscription, programTypes, types } from "@zetamarkets/sdk";
+import { subscription, programTypes, types, Exchange } from "@zetamarkets/sdk";
 import { POSITION_PRECISION } from "@zetamarkets/sdk/dist/constants";
 import { convertNativeBNToDecimal } from "@zetamarkets/sdk/dist/utils";
 import { putFirehoseBatch } from "./utils/firehose";
@@ -11,7 +11,6 @@ export const collectMarginAccountData = () => {
       data: subscription.AccountSubscriptionData<programTypes.MarginAccount>
     ) => {
       let marginAccountUpdateBatch: MarginAccountPosition[] = [];
-      const timestamp = Math.floor(Date.now() / 1000);
       const marginAccount = data.account;
       for (let i = 0; i < marginAccount.positions.length; i++) {
         let position = marginAccount.positions[i];
@@ -20,7 +19,8 @@ export const collectMarginAccountData = () => {
         let expiry = marginAccount.seriesExpiry[expiryIndex].toNumber();
 
         let marginAccountPosition: MarginAccountPosition = {
-          timestamp: timestamp,
+          timestamp: Exchange.clockTimestamp,
+          slot: Exchange.clockSlot,
           owner_pub_key: data.key.toString(),
           expiry_timestamp: expiry,
           balance: convertNativeBNToDecimal(marginAccount.balance),

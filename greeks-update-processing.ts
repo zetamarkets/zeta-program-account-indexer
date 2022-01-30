@@ -7,7 +7,6 @@ import {
 } from "@zetamarkets/sdk/dist/utils";
 
 export const collectPricingAndSurfaceData = async () => {
-  const timestamp = Math.floor(Date.now() / 1000);
   const pricingUpdate: Pricing[] = [];
   const surfaceUpdate: Surface[] = [];
 
@@ -50,7 +49,8 @@ export const collectPricingAndSurfaceData = async () => {
     }
 
     const newSurfaceUpdate: Surface = {
-      timestamp: timestamp,
+      timestamp: Exchange.clockTimestamp,
+      slot: Exchange.clockSlot,
       expiry_series_index: expiryIndex,
       expiry_timestamp: expiryTs,
       vol_surface: volatility,
@@ -94,7 +94,8 @@ export const collectPricingAndSurfaceData = async () => {
       }
 
       const newPricingUpdate: Pricing = {
-        timestamp: timestamp,
+        timestamp: Exchange.clockTimestamp,
+        slot: Exchange.clockSlot,
         expiry_series_index: expiryIndex,
         expiry_timestamp: expiryTs,
         market_index: marketIndex,
