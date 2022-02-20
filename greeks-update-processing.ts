@@ -61,7 +61,12 @@ export const collectPricingAndSurfaceData = async () => {
     surfaceUpdate.push(newSurfaceUpdate);
     putFirehoseBatch(surfaceUpdate, process.env.FIREHOSE_DS_NAME_SURFACES);
 
-    let marginAccounts = await Exchange.program.account.marginAccount.all();
+    let marginAccounts: any[] = undefined;
+    try {
+      marginAccounts = await Exchange.program.account.marginAccount.all();
+    } catch (e) {
+      throw Error("[MARGIN ACCOUNT] Margin Account fetch error.");
+    }
 
     let markets = Exchange.markets.getMarketsByExpiryIndex(expiryIndex);
     for (var j = 0; j < markets.length; j++) {
