@@ -7,7 +7,11 @@ import { collectMarginAccountData } from "./margin-account-processing";
 const callback = (eventType: EventType, data: any) => {
   switch (eventType) {
     case EventType.GREEKS:
-      collectPricingAndSurfaceData();
+      try {
+        collectPricingAndSurfaceData();
+      } catch (e) {
+        console.log("[GREEKS]", e);
+      }
   }
 };
 
@@ -38,7 +42,11 @@ export const refreshExchange = async () => {
     undefined,
     callback
   );
-  collectMarginAccountData();
+  try {
+    collectMarginAccountData();
+  } catch (e) {
+    console.log("[MARGIN ACCOUNTS]", e);
+  }
 };
 
 const main = async () => {
@@ -51,7 +59,11 @@ const main = async () => {
     undefined,
     callback
   );
-  collectMarginAccountData();
+  try {
+    collectMarginAccountData();
+  } catch (e) {
+    console.log("[MARGIN ACCOUNTS]", e);
+  }
 
   setInterval(async () => {
     console.log("Refreshing Exchange");
