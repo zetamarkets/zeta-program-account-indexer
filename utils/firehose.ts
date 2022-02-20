@@ -26,7 +26,8 @@ export const putFirehoseBatch = (
     if (err) {
       console.log("Firehose putRecordBatch Error", err);
     } else {
-      console.log("Firehose putRecordBatch Success", data);
+      // console.log("Firehose putRecordBatch Success", data);
+      console.log("Firehose putRecordBatch Success:", deliveryStreamName);
     }
   });
 };

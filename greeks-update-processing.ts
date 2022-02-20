@@ -62,6 +62,7 @@ export const collectPricingAndSurfaceData = async () => {
     putFirehoseBatch(surfaceUpdate, process.env.FIREHOSE_DS_NAME_SURFACES);
 
     let marginAccounts: any[] = undefined;
+    console.log("Fetching margin accounts...");
     try {
       marginAccounts = await Exchange.program.account.marginAccount.all();
     } catch (e) {
