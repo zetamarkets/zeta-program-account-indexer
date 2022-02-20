@@ -68,6 +68,7 @@ export const collectPricingAndSurfaceData = async () => {
     } catch (e) {
       throw Error("[MARGIN ACCOUNT] Margin Account fetch error.");
     }
+    console.log("Finished fetching margin accounts.");
 
     let markets = Exchange.markets.getMarketsByExpiryIndex(expiryIndex);
     for (var j = 0; j < markets.length; j++) {
