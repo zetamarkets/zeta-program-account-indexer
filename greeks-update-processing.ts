@@ -6,7 +6,14 @@ import {
   getGreeksIndex,
 } from "@zetamarkets/sdk/dist/utils";
 
+let fetchingMarginAccounts = false;
+
 export const collectPricingAndSurfaceData = async () => {
+  if (fetchingMarginAccounts) {
+    console.log("Already fetching margin accounts.");
+    return;
+  };
+
   const pricingUpdate: Pricing[] = [];
   const surfaceUpdate: Surface[] = [];
 
@@ -63,12 +70,14 @@ export const collectPricingAndSurfaceData = async () => {
 
     const timeFetched = Date.now();
     let marginAccounts: any[] = undefined;
+    fetchingMarginAccounts = true;
     console.log(`[${timeFetched}] Fetching margin accounts...`);
     try {
       marginAccounts = await Exchange.program.account.marginAccount.all();
     } catch (e) {
       throw Error("[MARGIN ACCOUNT] Margin Account fetch error.");
     }
+    fetchingMarginAccounts = false;
     console.log(`[${timeFetched}] Finished fetching margin accounts.`);
 
     let markets = Exchange.markets.getMarketsByExpiryIndex(expiryIndex);
