@@ -9,13 +9,7 @@ import { refreshExchange } from ".";
 
 let fetchingMarginAccounts = false;
 
-export const collectPricingAndSurfaceData = async () => {
-  if (fetchingMarginAccounts) {
-    console.log("Already fetching margin accounts.");
-    return;
-  };
-
-  const pricingUpdate: Pricing[] = [];
+export const collectSurfaceData = () => {
   const surfaceUpdate: Surface[] = [];
 
   for (var i = 0; i < 2; i++) {
@@ -68,20 +62,45 @@ export const collectPricingAndSurfaceData = async () => {
 
     surfaceUpdate.push(newSurfaceUpdate);
     putFirehoseBatch(surfaceUpdate, process.env.FIREHOSE_DS_NAME_SURFACES);
+  }
+};
 
-    const timeFetched = Date.now();
-    let marginAccounts: any[] = undefined;
-    fetchingMarginAccounts = true;
-    console.log(`[${timeFetched}] Fetching margin accounts...`);
-    try {
-      marginAccounts = await Exchange.program.account.marginAccount.all();
-    } catch (e) {
-      console.log("[MARGIN ACCOUNT] Margin Account fetch error.");
-      refreshExchange();
-      return;
-    }
-    fetchingMarginAccounts = false;
-    console.log(`[${timeFetched}] Finished fetching margin accounts.`);
+export const collectPricingData = async () => {
+  const pricingUpdate: Pricing[] = [];
+
+  if (fetchingMarginAccounts) {
+    console.log("Already fetching margin accounts.");
+    return;
+  };
+
+  // Fetch margin accounts once for all expirySeries
+  const timeFetched = Date.now();
+  let marginAccounts: any[] = undefined;
+  fetchingMarginAccounts = true;
+  console.log(`[${timeFetched}] Fetching margin accounts...`);
+  try {
+    marginAccounts = await Exchange.program.account.marginAccount.all();
+  } catch (e) {
+    console.log("[MARGIN ACCOUNT] Margin Account fetch error.");
+    // Refresh exchange upon failure of margin accounts fetch
+    refreshExchange();
+    return;
+  }
+  fetchingMarginAccounts = false;
+  console.log(`[${timeFetched}] Finished fetching margin accounts.`);
+
+  for (var i = 0; i < 2; i++) {
+    let expiryIndex = i;
+    let expirySeries = Exchange.markets.expirySeries[expiryIndex];
+    let expiryTs = Math.floor(expirySeries.expiryTs);
+
+    // If expirySeries isn't live, do not go through inactive expirySeries
+    if (!expirySeries.isLive()) continue;
+    console.log(
+      `Expiration @ ${new Date(
+        expirySeries.expiryTs * 1000
+      )} Live: ${expirySeries.isLive()}`
+    );
 
     let markets = Exchange.markets.getMarketsByExpiryIndex(expiryIndex);
     for (var j = 0; j < markets.length; j++) {

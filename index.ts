@@ -1,13 +1,14 @@
 import { Exchange, Network, utils } from "@zetamarkets/sdk";
 import { PublicKey, Connection, ConfirmOptions } from "@solana/web3.js";
 import { EventType } from "@zetamarkets/sdk/dist/events";
-import { collectPricingAndSurfaceData } from "./greeks-update-processing";
+import { collectSurfaceData, collectPricingData } from "./greeks-update-processing";
 import { collectMarginAccountData } from "./margin-account-processing";
 
 const callback = (eventType: EventType, data: any) => {
   switch (eventType) {
     case EventType.GREEKS:
-      collectPricingAndSurfaceData();
+      collectSurfaceData();
+      collectPricingData();
   }
 };
 
