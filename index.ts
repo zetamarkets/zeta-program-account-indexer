@@ -1,7 +1,11 @@
 import { Exchange, Network, utils } from "@zetamarkets/sdk";
 import { PublicKey, Connection, ConfirmOptions } from "@solana/web3.js";
 import { EventType } from "@zetamarkets/sdk/dist/events";
-import { collectSurfaceData, collectPricingData } from "./greeks-update-processing";
+import {
+  collectSurfaceData,
+  collectPricingData,
+  collectVaultData,
+} from "./greeks-update-processing";
 import { collectMarginAccountData } from "./margin-account-processing";
 
 const callback = (eventType: EventType, data: any) => {
@@ -28,7 +32,7 @@ const network =
 
 export const refreshExchange = async () => {
   await Exchange.close();
-  console.log("Reloading Exchange..")
+  console.log("Reloading Exchange..");
   const newConnection = new Connection(process.env.RPC_URL, "finalized");
   await Exchange.load(
     new PublicKey(process.env.PROGRAM_ID),
@@ -53,6 +57,10 @@ const main = async () => {
     callback
   );
   collectMarginAccountData();
+
+  setInterval(() => {
+    collectVaultData();
+  }, 30 * 60 * 1000); // Every 30 mins
 
   setInterval(async () => {
     console.log("Refreshing Exchange");
