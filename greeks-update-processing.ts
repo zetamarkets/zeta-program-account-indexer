@@ -77,17 +77,19 @@ export const collectPricingData = async () => {
   const timeFetched = Date.now();
   let marginAccounts: any[] = undefined;
   fetchingMarginAccounts = true;
-  console.log(`[${timeFetched}] Fetching margin accounts...`);
+  console.log(`[${timeFetched}] Attemping to fetch margin accounts...`);
   try {
     marginAccounts = await Exchange.program.account.marginAccount.all();
   } catch (e) {
-    console.log("[MARGIN ACCOUNT] Margin Account fetch error.");
+    console.log("[MARGIN ACCOUNT] Failed to fetch margin account fetch error.");
     // Refresh exchange upon failure of margin accounts fetch
     refreshExchange();
+    fetchingMarginAccounts = false;
     return;
+  } finally {
+    fetchingMarginAccounts = false;
   }
-  fetchingMarginAccounts = false;
-  console.log(`[${timeFetched}] Finished fetching margin accounts.`);
+  console.log(`[${timeFetched}] Successfully fetched margin accounts.`);
 
   for (var i = 0; i < 2; i++) {
     let expiryIndex = i;
