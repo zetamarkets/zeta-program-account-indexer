@@ -1,14 +1,19 @@
 import { Exchange, Network, utils } from "@zetamarkets/sdk";
 import { PublicKey, Connection, ConfirmOptions } from "@solana/web3.js";
 import { EventType } from "@zetamarkets/sdk/dist/events";
-import { collectSurfaceData, collectPricingData } from "./greeks-update-processing";
+import {
+  collectSurfaceData,
+  collectPricingData,
+  collectVaultData,
+} from "./greeks-update-processing";
 import { collectMarginAccountData } from "./margin-account-processing";
 
 const callback = (eventType: EventType, data: any) => {
   switch (eventType) {
     case EventType.GREEKS:
-      collectSurfaceData();
-      collectPricingData();
+      // collectSurfaceData();
+      // collectPricingData();
+      collectVaultData();
   }
 };
 
@@ -28,7 +33,7 @@ const network =
 
 export const refreshExchange = async () => {
   await Exchange.close();
-  console.log("Reloading Exchange..")
+  console.log("Reloading Exchange..");
   const newConnection = new Connection(process.env.RPC_URL, "finalized");
   await Exchange.load(
     new PublicKey(process.env.PROGRAM_ID),
@@ -39,6 +44,7 @@ export const refreshExchange = async () => {
     undefined,
     callback
   );
+  console.log("A");
   collectMarginAccountData();
 };
 
@@ -52,6 +58,7 @@ const main = async () => {
     undefined,
     callback
   );
+  console.log("B");
   collectMarginAccountData();
 
   setInterval(async () => {
