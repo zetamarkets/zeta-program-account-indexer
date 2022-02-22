@@ -13,7 +13,6 @@ const callback = (eventType: EventType, data: any) => {
     case EventType.GREEKS:
       collectSurfaceData();
       collectPricingData();
-      collectVaultData();
   }
 };
 
@@ -58,6 +57,10 @@ const main = async () => {
     callback
   );
   collectMarginAccountData();
+
+  setInterval(() => {
+    collectVaultData();
+  }, 30 * 60 * 1000); // Every 30 mins
 
   setInterval(async () => {
     console.log("Refreshing Exchange");
