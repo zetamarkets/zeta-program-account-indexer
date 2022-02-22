@@ -62,3 +62,11 @@ export interface MarginAccountPosition {
   opening_orders_bid: number;
   opening_orders_ask: number;
 }
+
+export interface VaultBalance {
+  timestamp: number;
+  slot: number;
+  vault_balance: number;
+  insurance_vault_balance: number;
+  tvl: number;
+}
