@@ -11,7 +11,8 @@ import {
   convertNativeBNToDecimal,
   getGreeksIndex,
 } from "@zetamarkets/sdk/dist/utils";
-import { refreshExchange } from ".";
+import { reloadExchange } from ".";
+import { alert } from "./utils/telegram";
 
 let fetchingMarginAccounts = false;
 
@@ -87,9 +88,9 @@ export const collectPricingData = async () => {
   try {
     marginAccounts = await Exchange.program.account.marginAccount.all();
   } catch (e) {
-    console.log("[MARGIN ACCOUNT] Failed to fetch margin account fetch error.");
+    alert(`Failed to fetch margin account fetch error: ${e}` , false);
     // Refresh exchange upon failure of margin accounts fetch
-    refreshExchange();
+    reloadExchange();
     fetchingMarginAccounts = false;
     return;
   } finally {

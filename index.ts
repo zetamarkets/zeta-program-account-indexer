@@ -1,4 +1,4 @@
-import { Exchange, Network, utils } from "@zetamarkets/sdk";
+import { Exchange, Network } from "@zetamarkets/sdk";
 import { PublicKey, Connection, ConfirmOptions } from "@solana/web3.js";
 import { EventType } from "@zetamarkets/sdk/dist/events";
 import {
@@ -7,6 +7,7 @@ import {
   collectVaultData,
 } from "./greeks-update-processing";
 import { collectMarginAccountData } from "./margin-account-processing";
+import { alert } from "./utils/telegram";
 
 const callback = (eventType: EventType, data: any) => {
   switch (eventType) {
@@ -30,9 +31,9 @@ const network =
     ? Network.DEVNET
     : Network.LOCALNET;
 
-export const refreshExchange = async () => {
+export const reloadExchange = async () => {
   await Exchange.close();
-  console.log("Reloading Exchange..");
+  alert("Reloading exchange...", false);
   const newConnection = new Connection(process.env.RPC_URL, "finalized");
   await Exchange.load(
     new PublicKey(process.env.PROGRAM_ID),
@@ -43,10 +44,12 @@ export const refreshExchange = async () => {
     undefined,
     callback
   );
+  alert("Reloaded exchange.", false);
   collectMarginAccountData();
 };
 
 const main = async () => {
+  alert("Loading exchange...", false);
   await Exchange.load(
     new PublicKey(process.env.PROGRAM_ID),
     network,
@@ -56,6 +59,7 @@ const main = async () => {
     undefined,
     callback
   );
+  alert("Loaded exchange.", false);
   collectMarginAccountData();
 
   setInterval(() => {
@@ -63,9 +67,8 @@ const main = async () => {
   }, 30 * 60 * 1000); // Every 30 mins
 
   setInterval(async () => {
-    console.log("Refreshing Exchange");
-    refreshExchange();
-  }, 10_800_000); // Refresh every 3 hours
+    await reloadExchange();
+  }, 15 * 60 * 1000); // Refresh every 15 mins
 
   setInterval(async () => {
     await Exchange.updateExchangeState();
