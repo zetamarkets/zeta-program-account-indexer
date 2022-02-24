@@ -71,7 +71,11 @@ const main = async () => {
   }, 15 * 60 * 1000); // Refresh every 15 mins
 
   setInterval(async () => {
-    await Exchange.updateExchangeState();
+    try {
+      await Exchange.updateExchangeState();
+    } catch (e) {
+      alert("Failed to update exchange state:", e);
+    }
   }, 60_000);
 };
 
