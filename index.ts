@@ -74,7 +74,7 @@ const main = async () => {
     try {
       await Exchange.updateExchangeState();
     } catch (e) {
-      alert("Failed to update exchange state:", e);
+      alert(`Failed to update exchange state: ${e}`, true)
     }
   }, 60_000);
 };
