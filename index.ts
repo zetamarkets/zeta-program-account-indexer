@@ -68,7 +68,7 @@ const main = async () => {
 
   setInterval(async () => {
     await reloadExchange();
-  }, 15 * 60 * 1000); // Refresh every 15 mins
+  }, 60 * 60 * 1000); // Refresh once every hour
 
   setInterval(async () => {
     try {
