@@ -13,6 +13,7 @@ import {
 } from "@zetamarkets/sdk/dist/utils";
 import { reloadExchange } from ".";
 import { alert } from "./utils/telegram";
+import { Kind } from "@zetamarkets/sdk/dist/types";
 
 let fetchingMarginAccounts = false;
 
@@ -114,6 +115,8 @@ export const collectPricingData = async () => {
     let markets = Exchange.markets.getMarketsByExpiryIndex(expiryIndex);
     for (var j = 0; j < markets.length; j++) {
       let market = markets[j];
+      // Greeks for future markets do not exist
+      if (market.kind === Kind.FUTURE) continue;
       let marketIndex = market.marketIndex;
       let greeksIndex = getGreeksIndex(marketIndex);
       let markPrice = convertNativeBNToDecimal(
