@@ -133,10 +133,17 @@ export const collectPricingData = async () => {
         Exchange.greeks.productGreeks[greeksIndex].vega
       ).toNumber();
 
+      let interestRate = convertNativeBNToDecimal(
+        Exchange.greeks.interestRate[expiryIndex],
+        constants.PRICING_PRECISION
+      );
+
       if (market.kind === Kind.FUTURE) {
         delta = null;
         sigma = null;
         vega = null;
+      } else {
+        interestRate = null;
       }
 
       let totalPositions = 0;
@@ -160,6 +167,7 @@ export const collectPricingData = async () => {
         delta: delta,
         sigma: sigma,
         vega: vega,
+        interest_rate: interestRate,
         open_interest: totalPositions / 2,
       };
       pricingUpdate.push(newPricingUpdate);
