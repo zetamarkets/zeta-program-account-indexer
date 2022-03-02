@@ -34,7 +34,6 @@ export interface Pricing {
   delta: number;
   sigma: number;
   vega: number;
-  interest_rate: number;
   open_interest: number;
 }
 
