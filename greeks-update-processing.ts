@@ -115,8 +115,6 @@ export const collectPricingData = async () => {
     let markets = Exchange.markets.getMarketsByExpiryIndex(expiryIndex);
     for (var j = 0; j < markets.length; j++) {
       let market = markets[j];
-      // Greeks for future markets do not exist
-      if (market.kind === Kind.FUTURE) continue;
       let marketIndex = market.marketIndex;
       let greeksIndex = getGreeksIndex(marketIndex);
       let markPrice = convertNativeBNToDecimal(
@@ -134,6 +132,12 @@ export const collectPricingData = async () => {
       let vega = Decimal.fromAnchorDecimal(
         Exchange.greeks.productGreeks[greeksIndex].vega
       ).toNumber();
+
+      if (market.kind === Kind.FUTURE) {
+        delta = null;
+        sigma = null;
+        vega = null;
+      }
 
       let totalPositions = 0;
       for (var i = 0; i < marginAccounts.length; i++) {
