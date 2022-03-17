@@ -103,6 +103,7 @@ export const collectPricingData = async () => {
     let expiryIndex = i;
     let expirySeries = Exchange.markets.expirySeries[expiryIndex];
     let expiryTs = Math.floor(expirySeries.expiryTs);
+    
     // If expirySeries isn't live, do not go through inactive expirySeries
     if (!expirySeries.isLive()) continue;
     console.log(
