@@ -13,6 +13,7 @@ import {
 } from "@zetamarkets/sdk/dist/utils";
 import { reloadExchange } from ".";
 import { alert } from "./utils/telegram";
+import { Kind } from "@zetamarkets/sdk/dist/types";
 
 let fetchingMarginAccounts = false;
 
@@ -132,9 +133,15 @@ export const collectPricingData = async () => {
         Exchange.greeks.productGreeks[greeksIndex].vega
       ).toNumber();
 
+      if (market.kind === Kind.FUTURE) {
+        delta = null;
+        sigma = null;
+        vega = null;
+      }
+
       let totalPositions = 0;
-      for (var i = 0; i < marginAccounts.length; i++) {
-        let acc = marginAccounts[i].account as programTypes.MarginAccount;
+      for (var k = 0; k < marginAccounts.length; k++) {
+        let acc = marginAccounts[k].account as programTypes.MarginAccount;
         totalPositions += utils.convertNativeBNToDecimal(
           acc.positions[marketIndex].position.abs(),
           3
