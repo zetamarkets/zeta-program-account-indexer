@@ -103,7 +103,6 @@ export const collectPricingData = async () => {
     let expiryIndex = i;
     let expirySeries = Exchange.markets.expirySeries[expiryIndex];
     let expiryTs = Math.floor(expirySeries.expiryTs);
-
     // If expirySeries isn't live, do not go through inactive expirySeries
     if (!expirySeries.isLive()) continue;
     console.log(
@@ -140,8 +139,8 @@ export const collectPricingData = async () => {
       }
 
       let totalPositions = 0;
-      for (var i = 0; i < marginAccounts.length; i++) {
-        let acc = marginAccounts[i].account as programTypes.MarginAccount;
+      for (var k = 0; k < marginAccounts.length; k++) {
+        let acc = marginAccounts[k].account as programTypes.MarginAccount;
         totalPositions += utils.convertNativeBNToDecimal(
           acc.positions[marketIndex].position.abs(),
           3
