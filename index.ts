@@ -33,7 +33,6 @@ const network =
 
 export const reloadExchange = async () => {
   await Exchange.close();
-  alert("Reloading exchange...", false);
   const newConnection = new Connection(process.env.RPC_URL, "finalized");
   await Exchange.load(
     new PublicKey(process.env.PROGRAM_ID),
@@ -44,7 +43,6 @@ export const reloadExchange = async () => {
     undefined,
     callback
   );
-  alert("Reloaded exchange.", false);
   collectMarginAccountData();
 };
 
