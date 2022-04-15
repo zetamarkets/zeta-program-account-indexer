@@ -28,6 +28,7 @@ export const collectZetaGroupMarketMetadata = async () => {
       const newZetaGroupMarketMetadata: MarketMetadata = {
         timestamp: Exchange.clockTimestamp,
         slot: Exchange.clockSlot,
+        market_index: market.marketIndex,
         market_pub_key: market.serumMarket.address.toString(),
         underlying: underlyingToken,
         expiry_timestamp: expiryTs,
