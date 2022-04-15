@@ -8,6 +8,10 @@ import {
 } from "./greeks-update-processing";
 import { collectMarginAccountData } from "./margin-account-processing";
 import { alert } from "./utils/telegram";
+import {
+  collectZetaGroupMarketMetadata,
+  subscribeZetaGroupChanges,
+} from "./market-metadata-processing";
 
 const callback = (eventType: EventType, data: any) => {
   switch (eventType) {
@@ -44,6 +48,7 @@ export const reloadExchange = async () => {
     callback
   );
   collectMarginAccountData();
+  subscribeZetaGroupChanges();
 };
 
 const main = async () => {
@@ -59,6 +64,8 @@ const main = async () => {
   );
   alert("Loaded exchange.", false);
   collectMarginAccountData();
+  collectZetaGroupMarketMetadata();
+  subscribeZetaGroupChanges();
 
   setInterval(() => {
     collectVaultData();
@@ -72,7 +79,7 @@ const main = async () => {
     try {
       await Exchange.updateExchangeState();
     } catch (e) {
-      alert(`Failed to update exchange state: ${e}`, true)
+      alert(`Failed to update exchange state: ${e}`, true);
     }
   }, 60_000);
 };

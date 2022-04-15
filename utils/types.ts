@@ -70,3 +70,13 @@ export interface VaultBalance {
   insurance_vault_balance: number;
   tvl: number;
 }
+
+export interface MarketMetadata {
+  timestamp: number;
+  slot: number;
+  market_pub_key: string;
+  underlying: string;
+  expiry_timestamp: number;
+  strike: number;
+  kind: Kind;
+}
