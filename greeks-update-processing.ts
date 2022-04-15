@@ -85,11 +85,11 @@ export const collectPricingData = async () => {
   const timeFetched = Date.now();
   let marginAccounts: any[] = undefined;
   fetchingMarginAccounts = true;
-  console.log(`[${timeFetched}] Attemping to fetch margin accounts...`);
+  console.log(`[${timeFetched}] Attempting to fetch margin accounts...`);
   try {
     marginAccounts = await Exchange.program.account.marginAccount.all();
   } catch (e) {
-    alert(`Failed to fetch margin account fetch error: ${e}` , false);
+    alert(`Failed to fetch margin account fetch error: ${e}`, false);
     // Refresh exchange upon failure of margin accounts fetch
     reloadExchange();
     fetchingMarginAccounts = false;

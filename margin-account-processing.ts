@@ -24,18 +24,35 @@ export const collectMarginAccountData = () => {
           owner_pub_key: data.key.toString(),
           expiry_timestamp: expiry,
           balance: convertNativeBNToDecimal(marginAccount.balance),
-          rebalance_amount: convertNativeBNToDecimal(marginAccount.rebalanceAmount),
+          rebalance_amount: convertNativeBNToDecimal(
+            marginAccount.rebalanceAmount
+          ),
           force_cancel_flag: marginAccount.forceCancelFlag,
           market_index: marketIndex,
-          position: convertNativeBNToDecimal(position.position, POSITION_PRECISION),
+          position: convertNativeBNToDecimal(
+            position.position,
+            POSITION_PRECISION
+          ),
           cost_of_trades: convertNativeBNToDecimal(position.costOfTrades),
-          closing_orders: convertNativeBNToDecimal(position.closingOrders, POSITION_PRECISION),
-          opening_orders_bid: convertNativeBNToDecimal(position.openingOrders[0], POSITION_PRECISION),
-          opening_orders_ask: convertNativeBNToDecimal(position.openingOrders[1], POSITION_PRECISION)
-        }
+          closing_orders: convertNativeBNToDecimal(
+            position.closingOrders,
+            POSITION_PRECISION
+          ),
+          opening_orders_bid: convertNativeBNToDecimal(
+            position.openingOrders[0],
+            POSITION_PRECISION
+          ),
+          opening_orders_ask: convertNativeBNToDecimal(
+            position.openingOrders[1],
+            POSITION_PRECISION
+          ),
+        };
         marginAccountUpdateBatch.push(marginAccountPosition);
       }
-      putFirehoseBatch(marginAccountUpdateBatch, process.env.FIREHOSE_DS_NAME_MARGIN_ACCOUNT);
+      putFirehoseBatch(
+        marginAccountUpdateBatch,
+        process.env.FIREHOSE_DS_NAME_MARGIN_ACCOUNT
+      );
     }
   );
-}
+};
