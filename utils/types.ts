@@ -75,6 +75,7 @@ export interface MarketMetadata {
   timestamp: number;
   slot: number;
   market_pub_key: string;
+  market_index: number;
   underlying: string;
   expiry_timestamp: number;
   strike: number;
