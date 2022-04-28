@@ -2,7 +2,7 @@ import { subscription, programTypes, types, Exchange } from "@zetamarkets/sdk";
 import { POSITION_PRECISION } from "@zetamarkets/sdk/dist/constants";
 import { convertNativeBNToDecimal } from "@zetamarkets/sdk/dist/utils";
 import { putFirehoseBatch } from "./utils/firehose";
-import { MarginAccountPosition } from "./utils/types";
+import { MarginAccount, MarginAccountPosition } from "./utils/types";
 
 export const collectMarginAccountData = () => {
   subscription.subscribeProgramAccounts<programTypes.MarginAccount>(
@@ -10,29 +10,20 @@ export const collectMarginAccountData = () => {
     async (
       data: subscription.AccountSubscriptionData<programTypes.MarginAccount>
     ) => {
-      let marginAccountUpdateBatch: MarginAccountPosition[] = [];
+      const timestamp = Exchange.clockTimestamp;
+      const slot = data.context.slot;
       const marginAccount = data.account;
+      let marginAccountPositions: MarginAccountPosition[] = [];
+
       for (let i = 0; i < marginAccount.positions.length; i++) {
         let position = marginAccount.positions[i];
         const marketIndex = i;
         const expiryIndex = Math.floor(marketIndex / 23);
         let expiry = marginAccount.seriesExpiry[expiryIndex].toNumber();
-
         let marginAccountPosition: MarginAccountPosition = {
-          timestamp: Exchange.clockTimestamp,
-          slot: Exchange.clockSlot,
-          owner_pub_key: data.key.toString(),
-          expiry_timestamp: expiry,
-          balance: convertNativeBNToDecimal(marginAccount.balance),
-          rebalance_amount: convertNativeBNToDecimal(
-            marginAccount.rebalanceAmount
-          ),
-          force_cancel_flag: marginAccount.forceCancelFlag,
           market_index: marketIndex,
-          position: convertNativeBNToDecimal(
-            position.position,
-            POSITION_PRECISION
-          ),
+          expiry_timestamp: expiry,
+          size: convertNativeBNToDecimal(position.position, POSITION_PRECISION),
           cost_of_trades: convertNativeBNToDecimal(position.costOfTrades),
           closing_orders: convertNativeBNToDecimal(
             position.closingOrders,
@@ -47,10 +38,26 @@ export const collectMarginAccountData = () => {
             POSITION_PRECISION
           ),
         };
-        marginAccountUpdateBatch.push(marginAccountPosition);
+        marginAccountPositions.push(marginAccountPosition);
       }
+
+      let marginAccountUpdate: MarginAccount = {
+        timestamp: timestamp,
+        slot: slot,
+        // TODO: Add dynamic underlying conversion method
+        underlying: "SOL",
+        margin_account_address: data.key.toString(),
+        owner_pub_key: marginAccount.authority.toString(),
+        balance: convertNativeBNToDecimal(marginAccount.balance),
+        rebalance_amount: convertNativeBNToDecimal(
+          marginAccount.rebalanceAmount
+        ),
+        force_cancel_flag: marginAccount.forceCancelFlag,
+        positions: marginAccountPositions,
+      };
+
       putFirehoseBatch(
-        marginAccountUpdateBatch,
+        [marginAccountUpdate],
         process.env.FIREHOSE_DS_NAME_MARGIN_ACCOUNT
       );
     }
