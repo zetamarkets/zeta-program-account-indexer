@@ -1,7 +1,7 @@
 import AWS from "aws-sdk";
 import { AWSOptions } from "./aws-config";
 import {
-  MarginAccountPosition,
+  MarginAccount,
   MarketMetadata,
   Pricing,
   Surface,
@@ -22,7 +22,7 @@ export const putFirehoseBatch = (
     | Trade[]
     | Pricing[]
     | Surface[]
-    | MarginAccountPosition[]
+    | MarginAccount[]
     | VaultBalance[]
     | MarketMetadata[],
   deliveryStreamName: string

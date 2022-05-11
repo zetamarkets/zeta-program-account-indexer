@@ -83,6 +83,7 @@ export interface MarketMetadata {
   market_pub_key: string;
   market_index: number;
   underlying: string;
+  active_timestamp: number;
   expiry_timestamp: number;
   strike: number;
   kind: Kind;
