@@ -11,6 +11,7 @@ export const collectZetaGroupMarketMetadata = async () => {
     let expiryIndex = i;
     let expirySeries = Exchange.markets.expirySeries[expiryIndex];
     let expiryTs = Math.floor(expirySeries.expiryTs);
+    let activeTs = Math.floor(expirySeries.activeTs);
 
     // If expirySeries isn't live, do not go through inactive expirySeries
     if (!expirySeries.isLive()) continue;
@@ -31,6 +32,7 @@ export const collectZetaGroupMarketMetadata = async () => {
         market_index: market.marketIndex,
         market_pub_key: market.serumMarket.address.toString(),
         underlying: underlyingToken,
+        active_timestamp: activeTs,
         expiry_timestamp: expiryTs,
         strike: market.strike,
         kind: market.kind,
