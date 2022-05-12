@@ -20,9 +20,8 @@ import { DEBUG_MODE } from "./utils/constants";
 const callback = (eventType: EventType, data: any) => {
   switch (eventType) {
     case EventType.GREEKS:
-      break;
-    // collectSurfaceData();
-    // collectPricingData();
+      collectSurfaceData();
+      collectPricingData();
   }
 };
 
