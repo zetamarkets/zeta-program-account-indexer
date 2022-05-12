@@ -49,6 +49,14 @@ export interface Surface {
   interest_rate: number;
 }
 
+export interface MarginAccountPnL {
+  margin_account_address: string;
+  underlying: string;
+  owner_pub_key: string;
+  balance: number;
+  positions: MarginAccountPosition[];
+}
+
 export interface MarginAccount {
   timestamp: number;
   slot: number;

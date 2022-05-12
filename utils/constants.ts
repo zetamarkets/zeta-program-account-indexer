@@ -8,3 +8,6 @@ export const NETWORK =
     : process.env.NETWORK === "devnet"
     ? Network.DEVNET
     : Network.LOCALNET;
+
+export const DEBUG_MODE = process.argv.slice(2).includes("--debug");
+export const MAX_ACCOUNTS_TO_FETCH = 100;

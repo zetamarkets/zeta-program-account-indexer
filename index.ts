@@ -6,18 +6,23 @@ import {
   collectPricingData,
   collectVaultData,
 } from "./greeks-update-processing";
-import { collectMarginAccountData } from "./margin-account-processing";
+import {
+  collectMarginAccountData,
+  snapshotMarginAccounts,
+} from "./margin-account-processing";
 import { alert } from "./utils/telegram";
 import {
   collectZetaGroupMarketMetadata,
   subscribeZetaGroupChanges,
 } from "./market-metadata-processing";
+import { DEBUG_MODE } from "./utils/constants";
 
 const callback = (eventType: EventType, data: any) => {
   switch (eventType) {
     case EventType.GREEKS:
-      collectSurfaceData();
-      collectPricingData();
+      break;
+    // collectSurfaceData();
+    // collectPricingData();
   }
 };
 
@@ -52,6 +57,9 @@ export const reloadExchange = async () => {
 };
 
 const main = async () => {
+  if (DEBUG_MODE) {
+    console.log("Running in debug mode, no data will be pushed to AWS");
+  }
   alert("Loading exchange...", false);
   await Exchange.load(
     new PublicKey(process.env.PROGRAM_ID),
@@ -74,6 +82,10 @@ const main = async () => {
   setInterval(async () => {
     await reloadExchange();
   }, 60 * 60 * 1000); // Refresh once every hour
+
+  setInterval(async () => {
+    await snapshotMarginAccounts();
+  }, 60 * 1000); // Snapshot once every minute
 
   setInterval(async () => {
     try {
