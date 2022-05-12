@@ -1,7 +1,8 @@
 import { Exchange } from "@zetamarkets/sdk";
 import { MarketMetadata } from "./utils/types";
-import { constants } from "@zetamarkets/flex-sdk";
+import { utils } from "@zetamarkets/flex-sdk";
 import { putFirehoseBatch } from "./utils/firehose";
+import { NETWORK } from "./utils/constants";
 
 export const collectZetaGroupMarketMetadata = async () => {
   if (!Exchange.isInitialized) return;
@@ -20,18 +21,17 @@ export const collectZetaGroupMarketMetadata = async () => {
     for (var j = 0; j < markets.length; j++) {
       let market = markets[j];
 
-      const underlyingMintPubKey = Exchange.zetaGroup.underlyingMint.toString();
-      const underlyingToken =
-        process.env.NETWORK === "mainnet"
-          ? constants.PUBKEY_TO_UNDERLYINGS_MAP.mainnet[underlyingMintPubKey]
-          : constants.PUBKEY_TO_UNDERLYINGS_MAP.devnet[underlyingMintPubKey];
+      const underlying = utils.getUnderlyingMapping(
+        NETWORK,
+        Exchange.zetaGroup.underlyingMint
+      );
 
       const newZetaGroupMarketMetadata: MarketMetadata = {
         timestamp: Exchange.clockTimestamp,
         slot: Exchange.clockSlot,
         market_index: market.marketIndex,
         market_pub_key: market.serumMarket.address.toString(),
-        underlying: underlyingToken,
+        underlying: underlying,
         active_timestamp: activeTs,
         expiry_timestamp: expiryTs,
         strike: market.strike,

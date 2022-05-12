@@ -5,6 +5,7 @@ import {
   programTypes,
   utils,
 } from "@zetamarkets/sdk";
+import { utils as FlexUtils } from "@zetamarkets/flex-sdk";
 import { Pricing, Surface, VaultBalance } from "./utils/types";
 import { putFirehoseBatch } from "./utils/firehose";
 import {
@@ -14,6 +15,7 @@ import {
 import { reloadExchange } from ".";
 import { alert } from "./utils/telegram";
 import { Kind } from "@zetamarkets/sdk/dist/types";
+import { NETWORK } from "./utils/constants";
 
 let fetchingMarginAccounts = false;
 
@@ -61,6 +63,10 @@ export const collectSurfaceData = () => {
     const newSurfaceUpdate: Surface = {
       timestamp: Exchange.clockTimestamp,
       slot: Exchange.clockSlot,
+      underlying: FlexUtils.getUnderlyingMapping(
+        NETWORK,
+        Exchange.zetaGroup.underlyingMint
+      ),
       expiry_series_index: expiryIndex,
       expiry_timestamp: expiryTs,
       vol_surface: volatility,
@@ -154,6 +160,10 @@ export const collectPricingData = async () => {
         expiry_series_index: expiryIndex,
         expiry_timestamp: expiryTs,
         market_index: marketIndex,
+        underlying: FlexUtils.getUnderlyingMapping(
+          NETWORK,
+          Exchange.zetaGroup.underlyingMint
+        ),
         strike: market.strike,
         kind: market.kind,
         theo: markPrice,

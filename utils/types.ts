@@ -28,6 +28,7 @@ export interface Pricing {
   expiry_series_index: number;
   expiry_timestamp: number;
   market_index: number;
+  underlying: string;
   strike: number;
   kind: Kind;
   theo: number;
@@ -42,6 +43,7 @@ export interface Surface {
   slot: number;
   expiry_series_index: number;
   expiry_timestamp: number;
+  underlying: string;
   vol_surface: number[];
   nodes: number[];
   interest_rate: number;
