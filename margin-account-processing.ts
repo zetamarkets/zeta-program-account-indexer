@@ -1,6 +1,8 @@
+import { utils } from "@zetamarkets/flex-sdk";
 import { subscription, programTypes, types, Exchange } from "@zetamarkets/sdk";
 import { POSITION_PRECISION } from "@zetamarkets/sdk/dist/constants";
 import { convertNativeBNToDecimal } from "@zetamarkets/sdk/dist/utils";
+import { NETWORK } from "./utils/constants";
 import { putFirehoseBatch } from "./utils/firehose";
 import { MarginAccount, MarginAccountPosition } from "./utils/types";
 
@@ -40,12 +42,13 @@ export const collectMarginAccountData = () => {
         };
         marginAccountPositions.push(marginAccountPosition);
       }
-
       let marginAccountUpdate: MarginAccount = {
         timestamp: timestamp,
         slot: slot,
-        // TODO: Add dynamic underlying conversion method
-        underlying: "SOL",
+        underlying: utils.getUnderlyingMapping(
+          NETWORK,
+          Exchange.zetaGroup.underlyingMint
+        ),
         margin_account_address: data.key.toString(),
         owner_pub_key: marginAccount.authority.toString(),
         balance: convertNativeBNToDecimal(marginAccount.balance),
