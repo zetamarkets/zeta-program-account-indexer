@@ -1,8 +1,13 @@
 import { utils } from "@zetamarkets/flex-sdk";
 import { subscription, programTypes, types, Exchange } from "@zetamarkets/sdk";
 import { POSITION_PRECISION } from "@zetamarkets/sdk/dist/constants";
-import { convertNativeBNToDecimal } from "@zetamarkets/sdk/dist/utils";
 import { NETWORK } from "./utils/constants";
+import {
+  convertNativeBNToDecimal,
+  convertNativeIntegerToDecimal,
+  getAllProgramAccountAddresses,
+} from "@zetamarkets/sdk/dist/utils";
+import { RiskCalculator } from "@zetamarkets/sdk/dist/risk";
 import { putFirehoseBatch } from "./utils/firehose";
 import {
   MarginAccount,
@@ -108,6 +113,7 @@ export const collectMarginAccountData = () => {
 
 export const snapshotMarginAccounts = async () => {
   console.log("Snapshotting margin accounts");
+  let riskCalculator = new RiskCalculator();
   let marginAccPubkeys: PublicKey[];
   try {
     marginAccPubkeys = await getAllProgramAccountAddresses(
@@ -131,7 +137,7 @@ export const snapshotMarginAccounts = async () => {
     }
 
     for (let j = 0; j < marginAccs.length; j++) {
-      let marginAccountPositions = await constructMarginAccountPositions(
+      let unrealizedPnl = await riskCalculator.calculateUnrealizedPnl(
         marginAccs[j]
       );
 
@@ -141,14 +147,14 @@ export const snapshotMarginAccounts = async () => {
         margin_account_address: marginAccPubkeys[i + j].toString(),
         owner_pub_key: marginAccs[j].authority.toString(),
         balance: convertNativeBNToDecimal(marginAccs[j].balance),
-        positions: marginAccountPositions,
+        unrealizedPnl: convertNativeIntegerToDecimal(unrealizedPnl),
       };
 
       // console.log(marginAccountUpdate);
 
       putFirehoseBatch(
         [marginAccountUpdate],
-        process.env.FIREHOSE_DS_NAME_MARGIN_ACCOUNT
+        process.env.FIREHOSE_DS_NAME_MARGIN_ACCOUNT_PNL
       );
     }
   }

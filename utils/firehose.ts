@@ -41,9 +41,19 @@ export const putFirehoseBatch = (
   };
   firehose.putRecordBatch(params, function (err, data) {
     if (err) {
-      console.log("Firehose putRecordBatch Error", err);
+      console.log(
+        "Firehose putRecordBatch ",
+        deliveryStreamName,
+        " Error",
+        err
+      );
     } else {
-      console.log("Firehose putRecordBatch Success:", deliveryStreamName);
+      console.log(
+        "Firehose putRecordBatch ",
+        deliveryStreamName,
+        " Success:",
+        deliveryStreamName
+      );
     }
   });
 };
