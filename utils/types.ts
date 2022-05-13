@@ -50,6 +50,7 @@ export interface Surface {
 }
 
 export interface MarginAccountPnL {
+  timestamp: number;
   margin_account_address: string;
   underlying: string;
   owner_pub_key: string;

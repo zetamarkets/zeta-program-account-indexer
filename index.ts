@@ -84,7 +84,7 @@ const main = async () => {
 
   setInterval(async () => {
     await snapshotMarginAccounts();
-  }, 60 * 1000); // Snapshot once every minute
+  }, 60 * 60 * 1000); // Snapshot once every hour
 
   setInterval(async () => {
     try {
