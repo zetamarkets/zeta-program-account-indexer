@@ -1,6 +1,7 @@
 import AWS from "aws-sdk";
 import { AWSOptions } from "./aws-config";
 import { Trade } from "./types";
+import { DEBUG_MODE } from "./constants";
 
 let dynamodb = new AWS.DynamoDB(AWSOptions);
 let docClient = new AWS.DynamoDB.DocumentClient(AWSOptions);
@@ -12,6 +13,7 @@ dynamodb.listTables({}, function (err, data) {
 });
 
 export const putDynamo = (data: Trade[], dynamoTableName: string) => {
+  if (DEBUG_MODE) return;
   if (!data.length) return;
   const dynamoData = data.map((d) => {
     return {

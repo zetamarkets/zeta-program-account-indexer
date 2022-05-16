@@ -1,10 +1,22 @@
 import { utils } from "@zetamarkets/flex-sdk";
 import { subscription, programTypes, types, Exchange } from "@zetamarkets/sdk";
 import { POSITION_PRECISION } from "@zetamarkets/sdk/dist/constants";
-import { convertNativeBNToDecimal } from "@zetamarkets/sdk/dist/utils";
 import { NETWORK } from "./utils/constants";
+import {
+  convertNativeBNToDecimal,
+  convertNativeIntegerToDecimal,
+  getAllProgramAccountAddresses,
+} from "@zetamarkets/sdk/dist/utils";
+import { RiskCalculator } from "@zetamarkets/sdk/dist/risk";
 import { putFirehoseBatch } from "./utils/firehose";
-import { MarginAccount, MarginAccountPosition } from "./utils/types";
+import {
+  MarginAccount,
+  MarginAccountPosition,
+  MarginAccountPnL,
+} from "./utils/types";
+import { MAX_ACCOUNTS_TO_FETCH } from "./utils/constants";
+import { PublicKey } from "@solana/web3.js";
+import { alert } from "./utils/telegram";
 
 export const collectMarginAccountData = () => {
   subscription.subscribeProgramAccounts<programTypes.MarginAccount>(
@@ -65,4 +77,62 @@ export const collectMarginAccountData = () => {
       );
     }
   );
+};
+
+export const snapshotMarginAccounts = async () => {
+  const timestamp = Exchange.clockTimestamp;
+  let marginAccPubkeys: PublicKey[];
+  try {
+    marginAccPubkeys = await getAllProgramAccountAddresses(
+      types.ProgramAccountType.MarginAccount
+    );
+  } catch (e) {
+    alert("Failed to fetch margin account pubkeys!", false);
+    return;
+  }
+
+  console.log(
+    "Snapshotting margin accounts. Timestamp = ",
+    timestamp.toString(),
+    " number of margin accounts = ",
+    marginAccPubkeys.length
+  );
+
+  for (let i = 0; i < marginAccPubkeys.length; i += MAX_ACCOUNTS_TO_FETCH) {
+    let marginAccs: any[];
+    try {
+      marginAccs = await Exchange.program.account.marginAccount.fetchMultiple(
+        marginAccPubkeys.slice(i, i + MAX_ACCOUNTS_TO_FETCH)
+      );
+    } catch (e) {
+      alert("Failed to fetch margin accounts!", false);
+      return;
+    }
+
+    let marginAccountUpdates = [];
+    for (let j = 0; j < marginAccs.length; j++) {
+      let unrealizedPnl = await Exchange.riskCalculator.calculateUnrealizedPnl(
+        marginAccs[j]
+      );
+
+      let marginAccountUpdate: MarginAccountPnL = {
+        timestamp: timestamp,
+        underlying: utils.getUnderlyingMapping(
+          NETWORK,
+          Exchange.zetaGroup.underlyingMint
+        ),
+        margin_account_address: marginAccPubkeys[i + j].toString(),
+        owner_pub_key: marginAccs[j].authority.toString(),
+        balance: convertNativeBNToDecimal(marginAccs[j].balance),
+        unrealizedPnl: unrealizedPnl,
+      };
+
+      marginAccountUpdates.push(marginAccountUpdate);
+    }
+
+    putFirehoseBatch(
+      marginAccountUpdates,
+      process.env.FIREHOSE_DS_NAME_MARGIN_ACCOUNT_PNL
+    );
+  }
 };
