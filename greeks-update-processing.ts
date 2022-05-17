@@ -149,7 +149,7 @@ export const collectPricingData = async () => {
       for (var k = 0; k < marginAccounts.length; k++) {
         let acc = marginAccounts[k].account as programTypes.MarginAccount;
         totalPositions += utils.convertNativeBNToDecimal(
-          acc.positions[marketIndex].position.abs(),
+          acc.productLedgers[marketIndex].position.size.abs(),
           3
         );
       }
