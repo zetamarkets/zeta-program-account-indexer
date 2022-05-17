@@ -29,27 +29,26 @@ export const collectMarginAccountData = () => {
       const marginAccount = data.account;
       let marginAccountPositions: MarginAccountPosition[] = [];
 
-      for (let i = 0; i < marginAccount.productLedgers.length; i++) {
-        let ledger = marginAccount.productLedgers[i];
-        let position = ledger.position;
+      for (let i = 0; i < marginAccount.positions.length; i++) {
+        let position = marginAccount.positions[i];
         const marketIndex = i;
         const expiryIndex = Math.floor(marketIndex / 23);
         let expiry = marginAccount.seriesExpiry[expiryIndex].toNumber();
         let marginAccountPosition: MarginAccountPosition = {
           market_index: marketIndex,
           expiry_timestamp: expiry,
-          size: convertNativeBNToDecimal(position.size, POSITION_PRECISION),
+          size: convertNativeBNToDecimal(position.position, POSITION_PRECISION),
           cost_of_trades: convertNativeBNToDecimal(position.costOfTrades),
           closing_orders: convertNativeBNToDecimal(
-            ledger.orderState.closingOrders,
+            position.closingOrders,
             POSITION_PRECISION
           ),
           opening_orders_bid: convertNativeBNToDecimal(
-            ledger.orderState.openingOrders[0],
+            position.openingOrders[0],
             POSITION_PRECISION
           ),
           opening_orders_ask: convertNativeBNToDecimal(
-            ledger.orderState.openingOrders[1],
+            position.openingOrders[1],
             POSITION_PRECISION
           ),
         };
