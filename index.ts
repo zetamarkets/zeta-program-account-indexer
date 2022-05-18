@@ -40,19 +40,24 @@ const network =
     : Network.LOCALNET;
 
 export const reloadExchange = async () => {
-  await Exchange.close();
-  const newConnection = new Connection(process.env.RPC_URL, "finalized");
-  await Exchange.load(
-    new PublicKey(process.env.PROGRAM_ID),
-    network,
-    newConnection,
-    opts,
-    undefined,
-    undefined,
-    callback
-  );
-  collectMarginAccountData();
-  subscribeZetaGroupChanges();
+  try {
+    await Exchange.close();
+    const newConnection = new Connection(process.env.RPC_URL, "finalized");
+    await Exchange.load(
+      new PublicKey(process.env.PROGRAM_ID),
+      network,
+      newConnection,
+      opts,
+      undefined,
+      undefined,
+      callback
+    );
+    collectMarginAccountData();
+    subscribeZetaGroupChanges();
+  } catch (e) {
+    alert("Failed to reload exchange", true);
+    reloadExchange();
+  }
 };
 
 const main = async () => {
@@ -76,15 +81,15 @@ const main = async () => {
 
   setInterval(() => {
     collectVaultData();
-  }, 30 * 60 * 1000); // Every 30 mins
+  }, 3 * 60 * 1000); // Every 30 mins
 
   setInterval(async () => {
     await reloadExchange();
-  }, 60 * 60 * 1000); // Refresh once every hour
+  }, 4 * 60 * 1000); // Refresh once every hour
 
   setInterval(async () => {
     await snapshotMarginAccounts();
-  }, 60 * 60 * 1000); // Snapshot once every hour
+  }, 5 * 60 * 1000); // Snapshot once every hour
 
   setInterval(async () => {
     try {
