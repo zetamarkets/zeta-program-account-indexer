@@ -81,15 +81,15 @@ const main = async () => {
 
   setInterval(() => {
     collectVaultData();
-  }, 3 * 60 * 1000); // Every 30 mins
+  }, 30 * 60 * 1000); // Every 30 mins
 
   setInterval(async () => {
     await reloadExchange();
-  }, 4 * 60 * 1000); // Refresh once every hour
+  }, 60 * 60 * 1000); // Refresh once every hour
 
   setInterval(async () => {
     await snapshotMarginAccounts();
-  }, 5 * 60 * 1000); // Snapshot once every hour
+  }, 60 * 60 * 1000); // Snapshot once every hour
 
   setInterval(async () => {
     try {
