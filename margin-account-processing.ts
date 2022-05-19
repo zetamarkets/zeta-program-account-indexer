@@ -125,7 +125,7 @@ export const snapshotMarginAccounts = async () => {
         margin_account_address: marginAccPubkeys[i + j].toString(),
         owner_pub_key: marginAccs[j].authority.toString(),
         balance: convertNativeBNToDecimal(marginAccs[j].balance),
-        unrealizedPnl: unrealizedPnl,
+        unrealized_pnl: unrealizedPnl,
       };
 
       marginAccountUpdates.push(marginAccountUpdate);
