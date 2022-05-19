@@ -55,7 +55,7 @@ export interface MarginAccountPnL {
   underlying: string;
   owner_pub_key: string;
   balance: number;
-  unrealizedPnl: number;
+  unrealized_pnl: number;
 }
 
 export interface MarginAccount {
