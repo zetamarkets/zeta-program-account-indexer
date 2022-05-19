@@ -40,19 +40,24 @@ const network =
     : Network.LOCALNET;
 
 export const reloadExchange = async () => {
-  await Exchange.close();
-  const newConnection = new Connection(process.env.RPC_URL, "finalized");
-  await Exchange.load(
-    new PublicKey(process.env.PROGRAM_ID),
-    network,
-    newConnection,
-    opts,
-    undefined,
-    undefined,
-    callback
-  );
-  collectMarginAccountData();
-  subscribeZetaGroupChanges();
+  try {
+    await Exchange.close();
+    const newConnection = new Connection(process.env.RPC_URL, "finalized");
+    await Exchange.load(
+      new PublicKey(process.env.PROGRAM_ID),
+      network,
+      newConnection,
+      opts,
+      undefined,
+      undefined,
+      callback
+    );
+    collectMarginAccountData();
+    subscribeZetaGroupChanges();
+  } catch (e) {
+    alert("Failed to reload exchange", true);
+    reloadExchange();
+  }
 };
 
 const main = async () => {
