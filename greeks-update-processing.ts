@@ -61,7 +61,7 @@ export const collectSurfaceData = () => {
     }
 
     const newSurfaceUpdate: Surface = {
-      timestamp: Exchange.clockTimestamp,
+      timestamp: Math.round(new Date().getTime() / 1000),
       slot: Exchange.clockSlot,
       underlying: FlexUtils.getUnderlyingMapping(
         NETWORK,
@@ -155,7 +155,7 @@ export const collectPricingData = async () => {
       }
 
       const newPricingUpdate: Pricing = {
-        timestamp: Exchange.clockTimestamp,
+        timestamp: Math.round(new Date().getTime() / 1000),
         slot: Exchange.clockSlot,
         expiry_series_index: expiryIndex,
         expiry_timestamp: expiryTs,
@@ -194,7 +194,7 @@ export const collectVaultData = async () => {
   );
 
   const vaultBalanceUpdate: VaultBalance = {
-    timestamp: Exchange.clockTimestamp,
+    timestamp: Math.round(new Date().getTime() / 1000),
     slot: Exchange.clockSlot,
     vault_balance: vaultBalance,
     insurance_vault_balance: insuranceVaultBalance,

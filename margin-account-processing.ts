@@ -4,7 +4,6 @@ import { POSITION_PRECISION } from "@zetamarkets/sdk/dist/constants";
 import { NETWORK } from "./utils/constants";
 import {
   convertNativeBNToDecimal,
-  convertNativeIntegerToDecimal,
   getAllProgramAccountAddresses,
 } from "@zetamarkets/sdk/dist/utils";
 import { RiskCalculator } from "@zetamarkets/sdk/dist/risk";
@@ -24,7 +23,7 @@ export const collectMarginAccountData = () => {
     async (
       data: subscription.AccountSubscriptionData<programTypes.MarginAccount>
     ) => {
-      const timestamp = Exchange.clockTimestamp;
+      const timestamp = Math.round(new Date().getTime() / 1000);
       const slot = data.context.slot;
       const marginAccount = data.account;
       let marginAccountPositions: MarginAccountPosition[] = [];
@@ -81,7 +80,7 @@ export const collectMarginAccountData = () => {
 };
 
 export const snapshotMarginAccounts = async () => {
-  const timestamp = Exchange.clockTimestamp;
+  const timestamp = Math.round(new Date().getTime() / 1000);
   let marginAccPubkeys: PublicKey[];
   try {
     marginAccPubkeys = await getAllProgramAccountAddresses(
