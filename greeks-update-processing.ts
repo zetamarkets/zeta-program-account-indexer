@@ -75,8 +75,8 @@ export const collectSurfaceData = () => {
     };
 
     surfaceUpdate.push(newSurfaceUpdate);
-    putFirehoseBatch(surfaceUpdate, process.env.FIREHOSE_DS_NAME_SURFACES);
   }
+  putFirehoseBatch(surfaceUpdate, process.env.FIREHOSE_DS_NAME_SURFACES);
 };
 
 export const collectPricingData = async () => {
