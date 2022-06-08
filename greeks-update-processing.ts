@@ -173,7 +173,7 @@ export const collectPricingData = async () => {
         open_interest: totalPositions / 2,
       };
       pricingUpdate.push(newPricingUpdate);
-    }
+    }    
     putFirehoseBatch(pricingUpdate, process.env.FIREHOSE_DS_NAME_PRICES);
   }
 };
@@ -200,6 +200,5 @@ export const collectVaultData = async () => {
     insurance_vault_balance: insuranceVaultBalance,
     tvl: vaultBalance + insuranceVaultBalance,
   };
-
   putFirehoseBatch([vaultBalanceUpdate], process.env.FIREHOSE_DS_NAME_VAULTS);
 };

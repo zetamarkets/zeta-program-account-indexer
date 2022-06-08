@@ -4,12 +4,7 @@ import { EventType } from "@zetamarkets/sdk/dist/events";
 import {
   collectSurfaceData,
   collectPricingData,
-  collectVaultData,
 } from "./greeks-update-processing";
-import {
-  collectMarginAccountData,
-  snapshotMarginAccounts,
-} from "./margin-account-processing";
 import { alert } from "./utils/telegram";
 import {
   collectZetaGroupMarketMetadata,
@@ -52,7 +47,6 @@ export const reloadExchange = async () => {
       undefined,
       callback
     );
-    collectMarginAccountData();
     subscribeZetaGroupChanges();
   } catch (e) {
     alert("Failed to reload exchange", true);
@@ -75,21 +69,12 @@ const main = async () => {
     callback
   );
   alert("Loaded exchange.", false);
-  collectMarginAccountData();
   collectZetaGroupMarketMetadata();
   subscribeZetaGroupChanges();
-
-  setInterval(() => {
-    collectVaultData();
-  }, 30 * 60 * 1000); // Every 30 mins
 
   setInterval(async () => {
     await reloadExchange();
   }, 60 * 60 * 1000); // Refresh once every hour
-
-  setInterval(async () => {
-    await snapshotMarginAccounts();
-  }, 60 * 60 * 1000); // Snapshot once every hour
 
   setInterval(async () => {
     try {

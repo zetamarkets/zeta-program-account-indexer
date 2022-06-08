@@ -6,12 +6,6 @@ import { DEBUG_MODE } from "./constants";
 let dynamodb = new AWS.DynamoDB(AWSOptions);
 let docClient = new AWS.DynamoDB.DocumentClient(AWSOptions);
 
-dynamodb.listTables({}, function (err, data) {
-  if (err) console.log(err, err.stack);
-  // an error occurred
-  else console.log(data); // successful response
-});
-
 export const putDynamo = (data: Trade[], dynamoTableName: string) => {
   if (DEBUG_MODE) return;
   if (!data.length) return;
