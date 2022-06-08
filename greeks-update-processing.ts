@@ -173,7 +173,7 @@ export const collectPricingData = async () => {
         open_interest: totalPositions / 2,
       };
       pricingUpdate.push(newPricingUpdate);
-    }    
+    }
     putFirehoseBatch(pricingUpdate, process.env.FIREHOSE_DS_NAME_PRICES);
   }
 };
