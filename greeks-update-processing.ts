@@ -6,7 +6,7 @@ import {
   utils,
 } from "@zetamarkets/sdk";
 import { utils as FlexUtils } from "@zetamarkets/flex-sdk";
-import { Pricing, Surface, VaultBalance } from "./utils/types";
+import { Pricing, Surface } from "./utils/types";
 import { putFirehoseBatch } from "./utils/firehose";
 import {
   convertNativeBNToDecimal,
@@ -176,29 +176,4 @@ export const collectPricingData = async () => {
     }    
     putFirehoseBatch(pricingUpdate, process.env.FIREHOSE_DS_NAME_PRICES);
   }
-};
-
-export const collectVaultData = async () => {
-  let vaultAccount = await utils.getTokenAccountInfo(
-    Exchange.connection,
-    Exchange.vaultAddress
-  );
-  let insuranceVaultAccount = await utils.getTokenAccountInfo(
-    Exchange.connection,
-    Exchange.insuranceVaultAddress
-  );
-
-  let vaultBalance = utils.convertNativeBNToDecimal(vaultAccount.amount);
-  let insuranceVaultBalance = utils.convertNativeBNToDecimal(
-    insuranceVaultAccount.amount
-  );
-
-  const vaultBalanceUpdate: VaultBalance = {
-    timestamp: Math.round(new Date().getTime() / 1000),
-    slot: Exchange.clockSlot,
-    vault_balance: vaultBalance,
-    insurance_vault_balance: insuranceVaultBalance,
-    tvl: vaultBalance + insuranceVaultBalance,
-  };
-  putFirehoseBatch([vaultBalanceUpdate], process.env.FIREHOSE_DS_NAME_VAULTS);
 };

@@ -1,13 +1,9 @@
 import AWS from "aws-sdk";
 import { AWSOptions } from "./aws-config";
 import {
-  MarginAccount,
-  MarginAccountPnL,
   MarketMetadata,
   Pricing,
   Surface,
-  Trade,
-  VaultBalance,
 } from "./types";
 import { DEBUG_MODE } from "./constants";
 
@@ -15,12 +11,8 @@ let firehose = new AWS.Firehose(AWSOptions);
 
 export const putFirehoseBatch = (
   data:
-    | Trade[]
     | Pricing[]
     | Surface[]
-    | MarginAccount[]
-    | MarginAccountPnL[]
-    | VaultBalance[]
     | MarketMetadata[],
   deliveryStreamName: string
 ) => {
