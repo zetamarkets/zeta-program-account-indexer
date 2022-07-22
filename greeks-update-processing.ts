@@ -4,6 +4,7 @@ import {
   Exchange,
   programTypes,
   utils,
+  assets,
 } from "@zetamarkets/sdk";
 import { utils as FlexUtils } from "@zetamarkets/flex-sdk";
 import { Pricing, Surface } from "./utils/types";
@@ -19,12 +20,12 @@ import { NETWORK } from "./utils/constants";
 
 let fetchingMarginAccounts = false;
 
-export const collectSurfaceData = () => {
+export const collectSurfaceData = (asset: assets.Asset) => {
   const surfaceUpdate: Surface[] = [];
 
   for (var i = 0; i < 2; i++) {
     let expiryIndex = i;
-    let expirySeries = Exchange.markets.expirySeries[expiryIndex];
+    let expirySeries = Exchange.getExpirySeriesList(asset)[expiryIndex];
     let expiryTs = Math.floor(expirySeries.expiryTs);
 
     // If expirySeries isn't live, do not go through inactive expirySeries
@@ -34,18 +35,16 @@ export const collectSurfaceData = () => {
         expirySeries.expiryTs * 1000
       )} Live: ${expirySeries.isLive()}`
     );
+    let greeks = Exchange.getGreeks(asset);
     let interestRate = convertNativeBNToDecimal(
-      Exchange.greeks.interestRate[expiryIndex],
+      greeks.interestRate[expiryIndex],
       constants.PRICING_PRECISION
     );
 
     let nodes = [];
-    for (var k = 0; k < Exchange.greeks.nodes.length; k++) {
+    for (var k = 0; k < greeks.nodes.length; k++) {
       nodes.push(
-        convertNativeBNToDecimal(
-          Exchange.greeks.nodes[k],
-          constants.PRICING_PRECISION
-        )
+        convertNativeBNToDecimal(greeks.nodes[k], constants.PRICING_PRECISION)
       );
     }
 
@@ -54,7 +53,7 @@ export const collectSurfaceData = () => {
     for (var l = expiryVolFirstIndex; l < expiryVolFirstIndex + 5; l++) {
       volatility.push(
         convertNativeBNToDecimal(
-          Exchange.greeks.volatility[l],
+          greeks.volatility[l],
           constants.PRICING_PRECISION
         )
       );
@@ -63,10 +62,7 @@ export const collectSurfaceData = () => {
     const newSurfaceUpdate: Surface = {
       timestamp: Math.round(new Date().getTime() / 1000),
       slot: Exchange.clockSlot,
-      underlying: FlexUtils.getUnderlyingMapping(
-        NETWORK,
-        Exchange.zetaGroup.underlyingMint
-      ),
+      underlying: assets.assetToName(asset),
       expiry_series_index: expiryIndex,
       expiry_timestamp: expiryTs,
       vol_surface: volatility,
@@ -79,7 +75,7 @@ export const collectSurfaceData = () => {
   putFirehoseBatch(surfaceUpdate, process.env.FIREHOSE_DS_NAME_SURFACES);
 };
 
-export const collectPricingData = async () => {
+export const collectPricingData = async (asset) => {
   const pricingUpdate: Pricing[] = [];
 
   if (fetchingMarginAccounts) {
@@ -97,7 +93,7 @@ export const collectPricingData = async () => {
   } catch (e) {
     alert(`Failed to fetch margin account fetch error: ${e}`, false);
     // Refresh exchange upon failure of margin accounts fetch
-    reloadExchange();
+    reloadExchange(asset);
     fetchingMarginAccounts = false;
     return;
   } finally {
@@ -107,7 +103,8 @@ export const collectPricingData = async () => {
 
   for (var i = 0; i < 2; i++) {
     let expiryIndex = i;
-    let expirySeries = Exchange.markets.expirySeries[expiryIndex];
+    let expirySeries =
+      Exchange.getZetaGroupMarkets(asset).expirySeries[expiryIndex];
     let expiryTs = Math.floor(expirySeries.expiryTs);
 
     // If expirySeries isn't live, do not go through inactive expirySeries
@@ -118,25 +115,27 @@ export const collectPricingData = async () => {
       )} Live: ${expirySeries.isLive()}`
     );
 
-    let markets = Exchange.markets.getMarketsByExpiryIndex(expiryIndex);
+    let markets =
+      Exchange.getZetaGroupMarkets(asset).getMarketsByExpiryIndex(expiryIndex);
     for (var j = 0; j < markets.length; j++) {
       let market = markets[j];
       let marketIndex = market.marketIndex;
       let greeksIndex = getGreeksIndex(marketIndex);
-      let markPrice = convertNativeBNToDecimal(
-        Exchange.greeks.markPrices[marketIndex]
-      );
+
+      let greeks = Exchange.getGreeks(asset);
+
+      let markPrice = convertNativeBNToDecimal(greeks.markPrices[marketIndex]);
       let delta = convertNativeBNToDecimal(
-        Exchange.greeks.productGreeks[greeksIndex].delta,
+        greeks.productGreeks[greeksIndex].delta,
         constants.PRICING_PRECISION
       );
 
       let sigma = Decimal.fromAnchorDecimal(
-        Exchange.greeks.productGreeks[greeksIndex].volatility
+        greeks.productGreeks[greeksIndex].volatility
       ).toNumber();
 
       let vega = Decimal.fromAnchorDecimal(
-        Exchange.greeks.productGreeks[greeksIndex].vega
+        greeks.productGreeks[greeksIndex].vega
       ).toNumber();
 
       if (market.kind === Kind.FUTURE) {
@@ -160,10 +159,7 @@ export const collectPricingData = async () => {
         expiry_series_index: expiryIndex,
         expiry_timestamp: expiryTs,
         market_index: marketIndex,
-        underlying: FlexUtils.getUnderlyingMapping(
-          NETWORK,
-          Exchange.zetaGroup.underlyingMint
-        ),
+        underlying: assets.assetToName(asset),
         strike: market.strike,
         kind: market.kind,
         theo: markPrice,
