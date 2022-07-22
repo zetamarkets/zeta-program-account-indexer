@@ -1,4 +1,4 @@
-import { Exchange, Network, assets } from "@zetamarkets/sdk";
+import { Exchange, Network } from "@zetamarkets/sdk";
 import { PublicKey, Connection, ConfirmOptions } from "@solana/web3.js";
 import { EventType } from "@zetamarkets/sdk/dist/events";
 import {
@@ -12,11 +12,11 @@ import {
 } from "./market-metadata-processing";
 import { DEBUG_MODE } from "./utils/constants";
 
-const callback = (asset: assets.Asset, eventType: EventType, data: any) => {
+const callback = (eventType: EventType, data: any) => {
   switch (eventType) {
     case EventType.GREEKS:
-      collectSurfaceData(asset);
-      collectPricingData(asset);
+      collectSurfaceData();
+      collectPricingData();
   }
 };
 
@@ -34,12 +34,11 @@ const network =
     ? Network.DEVNET
     : Network.LOCALNET;
 
-export const reloadExchange = async (assetList: assets.Asset[]) => {
+export const reloadExchange = async () => {
   try {
     await Exchange.close();
     const newConnection = new Connection(process.env.RPC_URL, "finalized");
     await Exchange.load(
-      assetList,
       new PublicKey(process.env.PROGRAM_ID),
       network,
       newConnection,
@@ -48,14 +47,10 @@ export const reloadExchange = async (assetList: assets.Asset[]) => {
       undefined,
       callback
     );
-    await Promise.all(
-      assetList.map(async (asset) => {
-        subscribeZetaGroupChanges(asset);
-      })
-    );
+    subscribeZetaGroupChanges();
   } catch (e) {
     alert("Failed to reload exchange", true);
-    reloadExchange(assetList);
+    reloadExchange();
   }
 };
 
@@ -63,19 +58,8 @@ const main = async () => {
   if (DEBUG_MODE) {
     console.log("Running in debug mode, no data will be pushed to AWS");
   }
-
-  let assetsJson = process.env.ASSETS!;
-  if (assetsJson[0] != "[" && assetsJson[-1] != "]") {
-    assetsJson = "[" + assetsJson + "]";
-  }
-  let assetsStrings: string[] = JSON.parse(assetsJson);
-  let allAssets = assetsStrings.map((assetStr) => {
-    return assets.nameToAsset(assetStr);
-  });
-
   alert("Loading exchange...", false);
   await Exchange.load(
-    allAssets,
     new PublicKey(process.env.PROGRAM_ID),
     network,
     connection,
@@ -85,15 +69,11 @@ const main = async () => {
     callback
   );
   alert("Loaded exchange.", false);
-  await Promise.all(
-    allAssets.map(async (asset) => {
-      collectZetaGroupMarketMetadata(asset);
-      subscribeZetaGroupChanges(asset);
-    })
-  );
+  collectZetaGroupMarketMetadata();
+  subscribeZetaGroupChanges();
 
   setInterval(async () => {
-    await reloadExchange(allAssets);
+    await reloadExchange();
   }, 60 * 60 * 1000); // Refresh once every hour
 
   setInterval(async () => {
