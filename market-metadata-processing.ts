@@ -1,33 +1,30 @@
-import { Exchange, assets } from "@zetamarkets/sdk";
+import { Exchange } from "@zetamarkets/sdk";
 import { MarketMetadata } from "./utils/types";
 import { utils } from "@zetamarkets/flex-sdk";
 import { putFirehoseBatch } from "./utils/firehose";
 import { NETWORK } from "./utils/constants";
 
-export const collectZetaGroupMarketMetadata = async (asset: assets.Asset) => {
+export const collectZetaGroupMarketMetadata = async () => {
   if (!Exchange.isInitialized) return;
   const zetaGroupMarketMetadata: MarketMetadata[] = [];
 
-  for (
-    var i = 0;
-    i < Exchange.getZetaGroupMarkets(asset).expirySeries.length;
-    i++
-  ) {
+  for (var i = 0; i < Exchange.markets.expirySeries.length; i++) {
     let expiryIndex = i;
-    let expirySeries =
-      Exchange.getZetaGroupMarkets(asset).expirySeries[expiryIndex];
+    let expirySeries = Exchange.markets.expirySeries[expiryIndex];
     let expiryTs = Math.floor(expirySeries.expiryTs);
     let activeTs = Math.floor(expirySeries.activeTs);
 
     // If expirySeries isn't live, do not go through inactive expirySeries
     if (!expirySeries.isLive()) continue;
 
-    let markets =
-      Exchange.getZetaGroupMarkets(asset).getMarketsByExpiryIndex(expiryIndex);
+    let markets = Exchange.markets.getMarketsByExpiryIndex(expiryIndex);
     for (var j = 0; j < markets.length; j++) {
       let market = markets[j];
 
-      const underlying = assets.assetToName(asset);
+      const underlying = utils.getUnderlyingMapping(
+        NETWORK,
+        Exchange.zetaGroup.underlyingMint
+      );
 
       const newZetaGroupMarketMetadata: MarketMetadata = {
         timestamp: Math.round(new Date().getTime() / 1000),
@@ -49,14 +46,14 @@ export const collectZetaGroupMarketMetadata = async (asset: assets.Asset) => {
   );
 };
 
-export const subscribeZetaGroupChanges = (asset: assets.Asset) => {
+export const subscribeZetaGroupChanges = () => {
   const eventEmitter = Exchange.program.account.zetaGroup.subscribe(
-    Exchange.getZetaGroupAddress(asset),
+    Exchange.zetaGroupAddress,
     "finalized"
   );
   eventEmitter.on("change", async () => {
-    await Exchange.updateZetaGroup(asset);
-    await Exchange.getZetaGroupMarkets(asset).updateExpirySeries();
-    collectZetaGroupMarketMetadata(asset);
+    await Exchange.updateZetaGroup();
+    await Exchange.markets.updateExpirySeries();
+    collectZetaGroupMarketMetadata();
   });
 };
