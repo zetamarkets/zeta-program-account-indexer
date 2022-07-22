@@ -5,6 +5,7 @@ import {
   programTypes,
   utils,
   assets,
+  types,
 } from "@zetamarkets/sdk";
 import { utils as FlexUtils } from "@zetamarkets/flex-sdk";
 import { Pricing, Surface } from "./utils/types";
@@ -89,7 +90,14 @@ export const collectPricingData = async (asset) => {
   fetchingMarginAccounts.set(asset, true);
   console.log(`[${timeFetched}] Attempting to fetch margin accounts...`);
   try {
-    marginAccounts = await Exchange.program.account.marginAccount.all();
+    let addresses = await utils.getAllProgramAccountAddresses(
+      types.ProgramAccountType.MarginAccount,
+      asset
+    );
+    marginAccounts = await Exchange.program.account.marginAccount.fetchMultiple(
+      addresses
+    );
+    console.log(marginAccounts.length);
   } catch (e) {
     alert(`Failed to fetch margin account fetch error: ${e}`, false);
     // Refresh exchange upon failure of margin accounts fetch
@@ -146,7 +154,7 @@ export const collectPricingData = async (asset) => {
 
       let totalPositions = 0;
       for (var k = 0; k < marginAccounts.length; k++) {
-        let acc = marginAccounts[k].account as programTypes.MarginAccount;
+        let acc = marginAccounts[k] as programTypes.MarginAccount;
         totalPositions += utils.convertNativeBNToDecimal(
           acc.productLedgers[marketIndex].position.size.abs(),
           3
