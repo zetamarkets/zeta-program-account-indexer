@@ -18,7 +18,7 @@ import { alert } from "./utils/telegram";
 import { Kind } from "@zetamarkets/sdk/dist/types";
 import { NETWORK } from "./utils/constants";
 
-let fetchingMarginAccounts = false;
+let fetchingMarginAccounts: Map<assets.Asset, boolean> = new Map();
 
 export const collectSurfaceData = (asset: assets.Asset) => {
   const surfaceUpdate: Surface[] = [];
@@ -78,7 +78,7 @@ export const collectSurfaceData = (asset: assets.Asset) => {
 export const collectPricingData = async (asset) => {
   const pricingUpdate: Pricing[] = [];
 
-  if (fetchingMarginAccounts) {
+  if (fetchingMarginAccounts.get(asset)) {
     console.log("Already fetching margin accounts.");
     return;
   }
@@ -86,7 +86,7 @@ export const collectPricingData = async (asset) => {
   // Fetch margin accounts once for all expirySeries
   const timeFetched = Date.now();
   let marginAccounts: any[] = undefined;
-  fetchingMarginAccounts = true;
+  fetchingMarginAccounts.set(asset, true);
   console.log(`[${timeFetched}] Attempting to fetch margin accounts...`);
   try {
     marginAccounts = await Exchange.program.account.marginAccount.all();
@@ -94,10 +94,10 @@ export const collectPricingData = async (asset) => {
     alert(`Failed to fetch margin account fetch error: ${e}`, false);
     // Refresh exchange upon failure of margin accounts fetch
     reloadExchange(asset);
-    fetchingMarginAccounts = false;
+    fetchingMarginAccounts.set(asset, false);
     return;
   } finally {
-    fetchingMarginAccounts = false;
+    fetchingMarginAccounts.set(asset, false);
   }
   console.log(`[${timeFetched}] Successfully fetched margin accounts.`);
 
